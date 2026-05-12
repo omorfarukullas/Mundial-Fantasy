@@ -8,6 +8,8 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'package:mobile/features/team_builder/presentation/team_builder_screen.dart';
 
+import 'package:mobile/features/leagues/presentation/leagues_screen.dart';
+
 final routerProvider = Provider<GoRouter>((ref) {
   return GoRouter(
     initialLocation: '/',
@@ -37,6 +39,11 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/team-builder',
         builder: (context, state) => const TeamBuilderScreen(),
       ),
+      GoRoute(
+        path: '/leagues',
+        builder: (context, state) => const LeaguesScreen(),
+      ),
     ],
   );
 });
+

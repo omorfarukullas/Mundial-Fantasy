@@ -41,9 +41,21 @@ class HomeScreen extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
               ),
             ),
+            const SizedBox(height: 16),
+            ElevatedButton.icon(
+              onPressed: () => context.push('/leagues'),
+              icon: const Icon(Icons.leaderboard),
+              label: const Text('Leagues & Standings'),
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
+                foregroundColor: Theme.of(context).colorScheme.onSecondaryContainer,
+              ),
+            ),
           ],
         ),
       ),
     );
   }
 }
+

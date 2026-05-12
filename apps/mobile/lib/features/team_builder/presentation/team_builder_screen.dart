@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mobile/features/team_builder/presentation/providers/team_provider.dart';
 import 'package:mobile/features/team_builder/presentation/widgets/pitch_view.dart';
+import 'package:mobile/features/team_builder/presentation/providers/gameweek_provider.dart';
+import 'package:mobile/features/team_builder/domain/gameweek.dart';
+import 'package:intl/intl.dart';
 
 class TeamBuilderScreen extends ConsumerWidget {
   const TeamBuilderScreen({super.key});
@@ -9,12 +12,42 @@ class TeamBuilderScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final teamState = ref.watch(teamProvider);
+    final gameweekAsync = ref.watch(activeGameweekProvider);
     final formations = ['4-4-2', '4-3-3', '3-5-2', '5-3-2'];
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('My Team'),
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('My Team'),
+            gameweekAsync.when(
+              data: (gw) => Text(
+                gw != null 
+                  ? 'GW ${gw.id} Deadline: ${DateFormat('MMM d, HH:mm').format(gw.deadlineAt)}'
+                  : 'No active gameweek',
+                style: const TextStyle(fontSize: 12),
+              ),
+              loading: () => const SizedBox.shrink(),
+              error: (_, __) => const SizedBox.shrink(),
+            ),
+          ],
+        ),
         actions: [
+          gameweekAsync.when(
+            data: (gw) => gw?.isLocked ?? false
+              ? const Padding(
+                  padding: EdgeInsets.only(right: 16.0),
+                  child: Chip(
+                    label: Text('LOCKED'),
+                    backgroundColor: Colors.red,
+                    labelStyle: TextStyle(color: Colors.white, fontSize: 10),
+                  ),
+                )
+              : const SizedBox.shrink(),
+            loading: () => const SizedBox.shrink(),
+            error: (_, __) => const SizedBox.shrink(),
+          ),
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Center(
@@ -28,7 +61,6 @@ class TeamBuilderScreen extends ConsumerWidget {
       ),
       body: Column(
         children: [
-          // Formation Picker
           Container(
             padding: const EdgeInsets.symmetric(vertical: 8),
             height: 60,
@@ -51,8 +83,6 @@ class TeamBuilderScreen extends ConsumerWidget {
               },
             ),
           ),
-          
-          // Pitch View
           Expanded(
             child: Padding(
               padding: const EdgeInsets.all(16.0),
@@ -62,8 +92,6 @@ class TeamBuilderScreen extends ConsumerWidget {
               ),
             ),
           ),
-          
-          // Stats Bar
           Container(
             padding: const EdgeInsets.all(16),
             color: Theme.of(context).cardColor,

@@ -14,8 +14,8 @@ This file tracks the status of the project based on the development phases defin
 - [x] Fantasy team builder UI in Flutter (pitch view, formation picker)
 - [x] Budget system, player placeholder UI (no real players yet)
 - [x] Scoring engine package — unit tested against all event types
-- [ ] Transfer logic with gameweek lock
-- [ ] League creation and join flow
+- [x] Transfer logic with gameweek lock
+- [x] League creation and join flow
 
 ## Phase 3 — Player Data Ingestion (~May 26, 2026)
 - [ ] Run seed scripts once all 48 squads are announced

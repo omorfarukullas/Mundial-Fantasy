@@ -108,3 +108,10 @@ export const leagueMembers = pgTable('league_members', {
   fantasyTeamId: uuid('fantasy_team_id').references(() => fantasyTeams.id),
   joinedAt: timestamp('joined_at', { withTimezone: true }).defaultNow(),
 });
+
+export const gameweeks = pgTable('gameweeks', {
+  id: integer('id').primaryKey(),
+  deadlineAt: timestamp('deadline_at', { withTimezone: true }).notNull(),
+  isActive: boolean('is_active').default(false),
+  isFinished: boolean('is_finished').default(false),
+});
