@@ -1,50 +1,67 @@
-# Mundial Fantasy - Comprehensive Implementation Plan
+# Mundial Fantasy - Granular Implementation Plan
 
-This document outlines the end-to-end implementation strategy for Mundial Fantasy, focusing on open-source tools and free tiers.
-
-## Phase 1: Foundation (COMPLETED)
-- [x] Monorepo structure (pnpm/npm workspace).
-- [x] Supabase integration (Auth, PostgreSQL, Migrations).
-- [x] Shared TypeScript package for scoring engine.
-- [x] Flutter app skeleton with GoRouter and Riverpod.
-
-## Phase 2: Core Fantasy Engine (COMPLETED)
-- [x] **Squad Builder**: Pitch view, formation selection (4-4-2, 4-3-3, etc.), and budget tracking.
-- [x] **Transfer Logic**: Backend validation for transfer deadlines and gameweek locks.
-- [x] **Leagues System**: Creation of private/public leagues, join flow via invite codes, and league membership management.
-
-## Phase 3: Player Data & Ingestion (Upcoming - ~May 26, 2026)
-- **Goal**: Populate the system with real-world players once squads are announced.
-- **Tasks**:
-  1.  **Seed Scripts**: Write TS/Node scripts to fetch or load player data into Supabase.
-  2.  **Price Initialization**: Set initial prices for all players based on historical performance/value.
-  3.  **Embeddings**: Generate pgvector embeddings for players to enable AI-powered semantic search and recommendations.
-  4.  **Flutter Integration**: Replace placeholder players with real data from the `players` table.
-
-## Phase 4: AI Advisor & Real-time Features
-- **Goal**: Add a unique value proposition using AI and live data.
-- **AI Strategy (Free/Open Source)**:
-  - Use **Hugging Face Inference API** (Free Tier) or **Llama 3 (via Groq/Ollama)** for the "AI Scout" and "Transfer Advisor".
-  - Implement 4 endpoints: `/ai/scout`, `/ai/transfer-advice`, `/ai/match-preview`, `/ai/team-optimization`.
-- **Live Match Engine**:
-  - Integrate **API-FOOTBALL** (Free Tier: 100 requests/day) or **Football-Data.org** for live scores.
-  - Use Supabase Realtime to push score updates and point changes to Flutter clients instantly.
-
-## Phase 5: Polish, Testing & Deployment
-- **Performance**: Use `k6` for load testing match-day spikes.
-- **Monitoring**: Set up **Grafana** (Free Tier) connected to Supabase/PostgreSQL metrics.
-- **Distribution**: 
-  - Android: Generate APK/App Bundle via GitHub Actions.
-  - iOS: TestFlight deployment.
-
-## Phase 6: Tournament Operation (June 11 – July 19, 2026)
-- Daily automated point calculations after each match.
-- Weekly "Dream Team" generation by the AI agent.
-- Automated prize/summary distribution for league winners.
+This document provides a highly detailed roadmap for the upcoming phases of Mundial Fantasy development.
 
 ---
 
-## Technical Debt & Maintenance
-- **Unit Testing**: Maintain 80%+ coverage for `@mundial/scoring-engine`.
-- **CI/CD**: Ensure GitHub Actions validate all PRs for both API and Mobile.
-- **Security**: Regularly audit RLS (Row Level Security) policies in Supabase.
+## Phase 3: Player Data & Ingestion (~May 26, 2026)
+**Objective**: Transition from placeholders to real-world tournament data.
+
+### 3.1 Data Seeding Infrastructure
+- [ ] **Scraper/Seed Script**: Create a Node.js script in `supabase/seed_players.ts` to parse official FIFA squad lists (JSON/CSV).
+- [ ] **National Team Matching**: map players to the `national_teams` table using FIFA 3-letter codes.
+- [ ] **Price Algorithm**:
+  - GK: 4.0m - 6.0m
+  - DEF: 4.5m - 7.0m
+  - MID: 5.0m - 10.0m
+  - FWD: 6.0m - 12.5m
+  - Based on club performance and expected minutes.
+
+### 3.2 Semantic Search & Vectorization
+- [ ] **Embedding Service**: Use a free embedding model (e.g., `sentence-transformers/all-MiniLM-L6-v2` via Hugging Face) to generate player profile vectors.
+- [ ] **pgvector Integration**: Store these in the `embedding` column of the `players` table.
+- [ ] **AI Search**: Implement a "Natural Language Player Picker" where users can type "Creative Brazilian winger under 8m".
+
+---
+
+## Phase 4: AI Advisor & Real-time Features
+**Objective**: Build the "Smart" layer of the application.
+
+### 4.1 AI Advisor Endpoints (NestJS)
+- [ ] **The Scout (`/ai/scout`)**: Suggests "differential" players with low ownership but high potential.
+- [ ] **Transfer Doctor (`/ai/transfer-advice`)**: Analyzes the user's current squad for injuries or difficult upcoming fixtures.
+- [ ] **Team Optimizer**: Runs a greedy algorithm + AI refinement to pick the best XI for the upcoming gameweek.
+- [ ] **Tooling**: Use **Groq API** (Llama 3 70B) for zero-latency AI responses.
+
+### 4.2 Live Match Engine
+- [ ] **Live Poller**: A background job that polls **API-FOOTBALL** every 60 seconds during active match windows.
+- [ ] **Event Processing**:
+  - Convert API events (Goal, Assist, etc.) into `match_events` table entries.
+  - Trigger `@mundial/scoring-engine` to calculate `player_match_points`.
+- [ ] **Real-time Push**: Use Supabase Realtime to broadcast point updates. Flutter clients listen to the `player_match_points` channel.
+
+---
+
+## Phase 5: Scaling & Production Readiness
+**Objective**: Ensure the system handles 10,000+ concurrent users during kickoff.
+
+### 5.1 Load Testing
+- [ ] **k6 Simulation**: Write a k6 script to simulate users logging in, drafting a team, and viewing live scores.
+- [ ] **Optimization**: Add Redis/In-memory caching in NestJS for the `players` and `matches` lists.
+
+### 5.2 CI/CD & DevOps
+- [ ] **GitHub Actions**:
+  - **Mobile**: Build and sign Android APK on every tag.
+  - **API**: Deploy NestJS to Railway/Vercel on merge to main.
+  - **Migrations**: Auto-apply Supabase migrations to production.
+
+### 5.3 Polish & UX
+- [ ] **Push Notifications**: Firebase Cloud Messaging (FCM) for lineup deadlines and goal alerts.
+- [ ] **Haptic Feedback**: Add subtle haptics in Flutter for drafting/selling players.
+
+---
+
+## Phase 6: Tournament Operation (June 11 – July 19, 2026)
+- [ ] **Gameweek Management**: Automatic status switching (Active -> Finished) based on match completions.
+- [ ] **Global Leaderboard**: Materialized view in PostgreSQL for high-performance ranking.
+- [ ] **Winner Celebration**: End-of-tournament AI-generated highlight reel for each user's team.
